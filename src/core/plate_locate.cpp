@@ -1184,6 +1184,9 @@ int CPlateLocate::plateSobelLocate(Mat src, vector<CPlate>& candPlates, int inde
 //! src 原始图像
 //! resultVec 一个Mat的向量，存储所有抓取到的图像
 //! 成功返回0，否则返回-1
+/*
+	plateLocate的总体识别思路是：如果我们的车牌没有大的旋转或变形，那么其中必然包括很多垂直边缘（这些垂直边缘往往缘由车牌中的字符），如果能够找到一个包含很多垂直边缘的矩形块，那么有很大的可能性它就是车牌。
+*/
 int CPlateLocate::plateLocate(Mat src, vector<Mat>& resultVec, int index)
 {
 	Mat src_blur, src_gray;
