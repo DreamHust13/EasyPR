@@ -77,6 +77,8 @@ public:
 
 	//! 车牌定位
 	int plateLocate(Mat, vector<Mat>&, int = 0 );
+	/*		plateLocate()参数:第一个代表输入的原图像；第二个是输出数组，代表所有检索到的车牌图块。返回值为int型，0代表成功，其他代表失败
+	*/
 
 	//! 车牌的尺寸验证
 	bool verifySizes(RotatedRect mr);
