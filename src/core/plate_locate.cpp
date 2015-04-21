@@ -190,12 +190,15 @@ bool CPlateLocate::sobelJudge(Mat roi)
 
 	Sobel(roi_grey, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_x, abs_grad_x);
-
+	//void Sobel(InputArray src, OutputArray dst, int ddepth, int dx, int dy, int ksize=3, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
+	
 	Sobel(roi_grey, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT);
 	convertScaleAbs(grad_y, abs_grad_y);
+	//convertScaleAbs:使用线性变换转换输入数组元素成8位无符号整型
 
 	addWeighted(abs_grad_x, SOBEL_X_WEIGHT, abs_grad_y, SOBEL_Y_WEIGHT, 0, grad);
-
+	//addWeighted:计算两数组的加权值的和
+	
 	Mat roi_threshold;
 	threshold(grad, roi_threshold, 0, 255, CV_THRESH_OTSU + CV_THRESH_BINARY);
 
@@ -1204,6 +1207,7 @@ int CPlateLocate::plateLocate(Mat src, vector<Mat>& resultVec, int index)
 	//高斯模糊。Size中的数字影响车牌定位的效果。
 	GaussianBlur(src, src_blur, Size(m_GaussianBlurSize, m_GaussianBlurSize),
 		0, 0, BORDER_DEFAULT);
+	//void GaussianBlur(InputArray src, OutputArray dst, Size ksize, double sigmaX, double sigmaY=0, int borderType=BORDER_DEFAULT )
 
 	if (m_debug)
 	{
