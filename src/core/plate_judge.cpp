@@ -12,6 +12,7 @@ CPlateJudge::CPlateJudge()
 	m_path = "model/svm.xml";
 	m_getFeatures = getHistogramFeatures;
 
+	//LoadModel()方法的主要任务就是装载model文件夹下svm.xml这个模型
 	LoadModel();
 }
 
@@ -59,9 +60,11 @@ int CPlateJudge::plateJudge(const Mat& inMat,int& result)
 	m_getFeatures(inMat, features);
 
 	//通过直方图均衡化后的彩色图进行预测
+	//首先，读取图像，然后将图片转为OpenCV需要的格式
 	Mat p = features.reshape(1, 1);
 	p.convertTo(p, CV_32FC1);
 
+	//调用svm的方法predict
 	int response = (int)svm.predict(p);
 	result = response;
 
@@ -81,6 +84,7 @@ int CPlateJudge::plateJudge(const vector<Mat>& inVec,
 		int response = -1;
 		plateJudge(inMat, response);
 
+		//返回值为1，代表是车牌；否则，不是
 		if (response == 1)
 			resultVec.push_back(inMat);
 	}
