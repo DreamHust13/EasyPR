@@ -38,8 +38,11 @@ namespace easypr {
 
 		vector<Mat> hsvSplit;
 		split(src_hsv, hsvSplit);
+		//Split():分割多通道数组成几个单通道数组或者从数组中提取一个通道
 		equalizeHist(hsvSplit[2], hsvSplit[2]);
+		//EqualizeHist():灰度图象直方图均衡化  该方法归一化图像亮度和增强对比度。
 		merge(hsvSplit, src_hsv);
+		//Merge():split()的反向操作，从几个单通道数组组合成多通道数组或插入一个单通道数组
 
 		//匹配模板基色,切换以查找想要的基色
 		int min_h = 0;
