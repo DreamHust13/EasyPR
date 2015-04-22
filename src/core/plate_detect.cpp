@@ -54,7 +54,7 @@ int CPlateDetect::plateDetect(Mat src, vector<Mat>& resultVec, int index)
 	return 0;
 }
 
-
+//综合定位代码：包括颜色定位、svm判断、sobel定位等
 int CPlateDetect::plateDetectDeep(Mat src, vector<Mat>& resultVec, bool showDetectArea, int index)
 {
 

@@ -14,7 +14,7 @@ void learn2HasPlate(float bound = 0.7)
 
 	const char * filePath = "train/data/plate_detect_svm/learn/HasPlate";
 
-	////获取该路径下的所有文件
+	//获取该路径下的所有文件
         auto files = Utils::getFiles(filePath);
 
 	int size = files.size();
@@ -22,7 +22,7 @@ void learn2HasPlate(float bound = 0.7)
 		cout << "File not found in " << filePath << endl;
         return;
     }
-	////随机选取70%作为训练数据，30%作为测试数据
+	//随机选取70%作为训练数据，30%作为测试数据
 	srand(unsigned(time(NULL)));
 	random_shuffle(files.begin(), files.end());
 
