@@ -53,6 +53,15 @@ void CPlateLocate::setLifemode(bool param)
 
 
 //! 对minAreaRect获得的最小外接矩形，用纵横比进行判断
+/*
+	中国车牌的一般大小是440mm*140mm，面积为440*140，宽高比为3.14。verifySizes使用如下方法判断矩形是否是车牌：
+
+　　1.设立一个偏差率error，根据这个偏差率计算最大和最小的宽高比rmax、rmin。判断矩形的r是否满足在rmax、rmin之间。
+　　2.设定一个面积最大值max与面积最小值min。判断矩形的面积area是否满足在max与min之间。
+
+　　以上两个条件必须同时满足，任何一个不满足都代表这不是车牌。
+
+*/
 bool CPlateLocate::verifySizes(RotatedRect mr)
 {
 	float error = m_error;
@@ -198,10 +207,13 @@ bool CPlateLocate::sobelJudge(Mat roi)
 
 	addWeighted(abs_grad_x, SOBEL_X_WEIGHT, abs_grad_y, SOBEL_Y_WEIGHT, 0, grad);
 	//addWeighted:计算两数组的加权值的和
-	
+   //两个常量SOBEL_X_WEIGHT与SOBEL_Y_WEIGHT代表水平方向和垂直方向的权值，默认前者是1，后者是0，代表仅仅做水平方向求导，而不做垂直方向求导
+
+	//二值化
 	Mat roi_threshold;
 	threshold(grad, roi_threshold, 0, 255, CV_THRESH_OTSU + CV_THRESH_BINARY);
 
+	//闭操作
 	Mat element = getStructuringElement(MORPH_RECT, Size(m_MorphSizeWidth, m_MorphSizeHeight) );
 	morphologyEx(roi_threshold, roi_threshold, MORPH_CLOSE, element);
 
@@ -261,8 +273,9 @@ int CPlateLocate::sobelFrtSearch(const Mat& src, vector<Rect_<float>>& outRects)
 	vector< vector< Point> > contours;
 	findContours(src_threshold,
 		contours, // a vector of contours
-		CV_RETR_EXTERNAL, // 提取外部轮廓
+		CV_RETR_EXTERNAL, // 提取外部轮廓CV_RETR_EXTERNAL - 只提取最外层的轮廓
 		CV_CHAIN_APPROX_NONE); // all pixels of each contours
+		//逼近方法CV_CHAIN_APPROX_NONE - 将所有点由链码形式翻译(转化）为点序列形式
 
 	vector<vector<Point>>::iterator itc = contours.begin();
 
@@ -391,11 +404,13 @@ int CPlateLocate::sobelOper(const Mat& in, Mat& out, int blurSize, int morphW, i
 
 
 //! 抗扭斜处理
+//没看懂！！！
 int CPlateLocate::deskew(const Mat& src, const Mat& src_b, vector<RotatedRect>& inRects, vector<CPlate>& outPlates)
 {
 
 	for (int i = 0; i < inRects.size(); i++)
 	{
+		//对于每个矩形
 		RotatedRect roi_rect = inRects[i];
 
 		float r = (float)roi_rect.size.width / (float)roi_rect.size.height;
@@ -407,6 +422,7 @@ int CPlateLocate::deskew(const Mat& src, const Mat& src_b, vector<RotatedRect>& 
 			swap(roi_rect_size.width, roi_rect_size.height);
 		}
 		
+		//如果抓取的方块旋转超过m_angle角度，则不是车牌，放弃处理
 		if (roi_angle - m_angle < 0 && roi_angle + m_angle > 0)
 		{
 			Rect_<float> safeBoundRect;
@@ -677,7 +693,7 @@ bool CPlateLocate::calcSafeRect(const RotatedRect& roi_rect, const Mat& src, Rec
 	return true;
 }
 
-
+//角度判断及旋转（旧版本，未使用！！）
 int CPlateLocate::deskewOld(Mat src, vector<RotatedRect>& inRects, 
 	vector<RotatedRect>& outRects, vector<Mat>& outMats, LocateType locateType)
 {
@@ -1216,6 +1232,7 @@ int CPlateLocate::plateLocate(Mat src, vector<Mat>& resultVec, int index)
 		imwrite(ss.str(), src_blur);
 	}
 
+	//灰度化
 	/// Convert it to gray
 	cvtColor(src_blur, src_gray, CV_RGB2GRAY);
 
@@ -1387,12 +1404,14 @@ int CPlateLocate::plateLocate(Mat src, vector<Mat>& resultVec, int index)
 		imwrite(ss.str(), out_yellow);
 	}
 
+	//二值化
 	Mat img_threshold_blue;
 	Mat img_threshold_yellow;
 	threshold(out_blue, img_threshold_blue, 0, 255, CV_THRESH_OTSU + CV_THRESH_BINARY);
 	threshold(out_yellow, img_threshold_yellow, 0, 255, CV_THRESH_OTSU + CV_THRESH_BINARY);
 	//threshold(grad, img_threshold, 75, 255, CV_THRESH_BINARY);
-
+	//最常见的是蓝牌和黄牌。其中蓝牌字符浅，背景深，黄牌则是字符深，背景浅，因此需要正二值化方法与反二值化两种方法来处理，其中正二值化处理蓝牌，反二值化处理黄牌。
+	
 	if (m_debug)
 	{
 		stringstream ss(stringstream::in | stringstream::out);
