@@ -671,7 +671,8 @@ void CPlateLocate::affine(const Mat& in, Mat& out, const double slope)
 bool CPlateLocate::calcSafeRect(const RotatedRect& roi_rect, const Mat& src, Rect_<float>& safeBoundRect)
 {
 	Rect_<float> boudRect = roi_rect.boundingRect();
-
+	//BoundingRect()：计算点集的最外面（up-right）矩形边界
+	
 	// boudRect的左上的x和y有可能小于0
 	float tl_x = boudRect.x > 0 ? boudRect.x : 0;
 	float tl_y = boudRect.y > 0 ? boudRect.y : 0;
